@@ -221,5 +221,16 @@
   "取消群組": "Ungroup",
   "移出群組": "Remove from group",
   "已群組 {n} 個": "Grouped {n} items",
-  "已取消群組": "Ungrouped"
+  "已取消群組": "Ungrouped",
+  "範例": "Sample",
+  "填入範例資料": "Fill with sample data",
+  "名字": "Names",
+  "隨機數字": "Random numbers",
+  "排序好的數字": "Sorted numbers",
+  "隨機字母": "Random letters",
+  "英文單字": "English word",
+  "名字 → 分數": "Name → score",
+  "字母 → 次數": "Letter → count",
+  "0 和 1": "0s and 1s",
+  "已填入範例資料": "Filled with sample data"
 }

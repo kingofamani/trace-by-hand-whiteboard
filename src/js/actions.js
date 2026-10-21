@@ -57,6 +57,7 @@ function act(a,v,i){
     case 'dir': it.dir=v; break;
     case 'style': it.style=v; break;
     case 'lpMenu': lpMenu(it); return;
+    case 'sampleMenu': sampleMenu(it); return;
   }
   renderAll(); commit();
 }

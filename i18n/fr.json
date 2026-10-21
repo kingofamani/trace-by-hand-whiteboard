@@ -221,5 +221,16 @@
   "取消群組": "Dégrouper",
   "移出群組": "Retirer du groupe",
   "已群組 {n} 個": "{n} éléments groupés",
-  "已取消群組": "Dégroupé"
+  "已取消群組": "Dégroupé",
+  "範例": "Exemple",
+  "填入範例資料": "Remplir avec des données d’exemple",
+  "名字": "Prénoms",
+  "隨機數字": "Nombres aléatoires",
+  "排序好的數字": "Nombres triés",
+  "隨機字母": "Lettres aléatoires",
+  "英文單字": "Mot anglais",
+  "名字 → 分數": "Prénom → note",
+  "字母 → 次數": "Lettre → nombre",
+  "0 和 1": "0 et 1",
+  "已填入範例資料": "Données d’exemple ajoutées"
 }

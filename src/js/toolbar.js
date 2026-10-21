@@ -36,6 +36,7 @@ function renderToolbar(){
   if(it.type==='tree'||it.type==='list'||it.type==='gnode') h+='<span class="sep2"></span>';
   if(it.type==='array'||it.type==='string') h+=_T('<button type="button" data-act="addPtr" title="加一個指標。Shift＋點格子＝標黃，Alt＋點格子＝變淡">＋指標</button>')+((it.hl||[]).length||(it.done||[]).length?_T('<button type="button" data-act="clearHl">清除標記</button>'):'')+'<span class="sep2"></span>';
   if((it.type==='grid'||it.type==='steps')&&(it.hl||[]).length) h+=_T('<button type="button" data-act="clearHl">清除標記</button><span class="sep2"></span>');
+  if(SAMPLEY.indexOf(it.type)>=0) h+='<button type="button" data-act="sampleMenu" title="'+_T('填入範例資料')+'">'+_T('範例')+'</button><span class="sep2"></span>';
   if(LPY.indexOf(it.type)>=0) h+='<button type="button" data-act="lpMenu" title="'+_T('名稱位置')+'">'+_T('名稱')+' '+LPS[lpOf(it)]+'</button><span class="sep2"></span>';
   if(it.g) h+='<button type="button" data-act="ungroup">'+_T('移出群組')+'</button><span class="sep2"></span>';
   h+=_T('<button type="button" data-act="zfront" title="移到最上層（⌘⌥]；往上一層 ⌘]）" aria-label="移到最上層">⤒</button><button type="button" data-act="zback" title="移到最下層（⌘⌥[；往下一層 ⌘[）" aria-label="移到最下層">⤓</button><span class="sep2"></span>');
