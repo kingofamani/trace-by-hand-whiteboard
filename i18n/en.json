@@ -199,5 +199,8 @@
   "線性": "Linear",
   "查表": "Lookup",
   "節點": "Nodes",
-  "點一下放到畫面中間，或直接拖到畫布上。": "Click to place in the center, or drag onto the canvas."
+  "點一下放到畫面中間，或直接拖到畫布上。": "Click to place in the center, or drag onto the canvas.",
+  "設定": "Settings",
+  "陣列 index 從 {n} 開始": "Array index starts at {n}",
+  "陣列 index 改成從 {n} 開始": "Array index now starts at {n}"
 }

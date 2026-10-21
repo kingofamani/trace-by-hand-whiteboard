@@ -330,6 +330,7 @@ table.grid .ax{display:inline-block;min-width:12px;padding:0 2px;border-radius:3
         <button class="zb" id="zin" type="button" title="放大（⌘＋）" aria-label="放大">＋</button>
         <button class="zb" id="zfit" type="button" title="全部看得到（⇧1）" aria-label="全部看得到"><svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg></button>
         <span class="zsep"></span>
+        <button class="zb" id="setBtn" type="button" title="設定" aria-label="設定"><svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-.44a2 2 0 00-2 2v.18a2 2 0 01-1 1.73l-.43.25a2 2 0 01-2 0l-.15-.08a2 2 0 00-2.73.73l-.22.38a2 2 0 00.73 2.73l.15.1a2 2 0 011 1.72v.51a2 2 0 01-1 1.74l-.15.09a2 2 0 00-.73 2.73l.22.38a2 2 0 002.73.73l.15-.08a2 2 0 012 0l.43.25a2 2 0 011 1.73V20a2 2 0 002 2h.44a2 2 0 002-2v-.18a2 2 0 011-1.73l.43-.25a2 2 0 012 0l.15.08a2 2 0 002.73-.73l.22-.39a2 2 0 00-.73-2.73l-.15-.08a2 2 0 01-1-1.74v-.5a2 2 0 011-1.74l.15-.09a2 2 0 00.73-2.73l-.22-.38a2 2 0 00-2.73-.73l-.15.08a2 2 0 01-2 0l-.43-.25a2 2 0 01-1-1.73V4a2 2 0 00-2-2z"/><circle cx="12" cy="12" r="3"/></svg></button>
         <button class="zb" id="helpBtn" type="button" title="操作說明" aria-label="操作說明">?</button>
       </div>
     </div>
@@ -384,6 +385,7 @@ var COLORS=['var(--ink)','var(--red)','var(--marker)','var(--green)','var(--purp
 var B={items:[],edges:[],strokes:[],seq:1};
 var view={x:40,y:30,z:1};
 var activeCell=null;
+var idxBase=0; try{idxBase=localStorage.getItem('drycanvas-ib')==='1'?1:0;}catch(e){} // 陣列 index 從 0 或 1 開始（全部白板共用）；只影響顯示，格子的 key 一律從 0 算
 var msel=[], mstk=[], clip=null, mouseW={x:0,y:0}, marq=null;
 var tool='select', sel=null, selEdge=null, connSrc=null, hist=[], fut=[], space=false;
 var $=function(id){return document.getElementById(id);};
@@ -460,7 +462,7 @@ var SWN=6;
 function BG(it,key){var n=it.cbg&&it.cbg[key];return n?' style="background:var(--sw'+n+')"':'';}
 function XB(act,i){return '<button class="xb ctl" type="button" data-act="'+act+'" data-i="'+i+_T('" aria-label="刪除">×</button>');}
 function cellsHtml(it,withIdx){
-  var h=it.cells.map(function(c,i){return '<div class="cw">'+XB('delCell',i)+(withIdx?'<span class="ix">'+i+'</span>':'')+'<div class="cell'+((it.hl||[]).indexOf(i)>=0?' hl':'')+((it.done||[]).indexOf(i)>=0?' done':'')+'"'+BG(it,i)+' contenteditable="true" spellcheck="false" data-c="'+i+'">'+esc(c)+'</div></div>';}).join('');
+  var h=it.cells.map(function(c,i){return '<div class="cw">'+XB('delCell',i)+(withIdx?'<span class="ix">'+(i+idxBase)+'</span>':'')+'<div class="cell'+((it.hl||[]).indexOf(i)>=0?' hl':'')+((it.done||[]).indexOf(i)>=0?' done':'')+'"'+BG(it,i)+' contenteditable="true" spellcheck="false" data-c="'+i+'">'+esc(c)+'</div></div>';}).join('');
   return h+_T('<button class="addc ctl" type="button" data-act="addCell" aria-label="加一格">＋</button>')+(it.cells.length?'':_T('<span class="empty">（空的）</span>'));
 }
 function itemHtml(it){
@@ -490,8 +492,8 @@ function itemHtml(it){
     case 'grid':
       var cols=it.rows[0]?it.rows[0].length:0;
       return '<div class="grip">⠿ '+nameHtml(it)+_T('<span>二維陣列</span></div><div class="gwrap"><table class="grid"><tr><th></th><th class="axis" colspan="')+Math.max(1,cols)+_T('"><span class="ax" contenteditable="true" spellcheck="false" data-f="cl" data-ph="欄">')+esc(it.colLabel||'')+_T('</span> →</th></tr><tr><th class="axis rax"><span class="ax" contenteditable="true" spellcheck="false" data-f="rl" data-ph="列">')+esc(it.rowLabel||'')+'</span> ↓</th>'+
-        Array.apply(null,{length:cols}).map(function(_,j){return '<th class="xh">'+j+'<button class="xb ctl" type="button" data-act="delCol" data-i="'+j+'" aria-label="'+_T('刪除第 {n} 欄',{n:j})+'">×</button></th>';}).join('')+'</tr>'+
-        it.rows.map(function(r,i){return '<tr><th class="xh">'+i+'<button class="xb ctl" type="button" data-act="delRow" data-i="'+i+'" aria-label="'+_T('刪除第 {n} 列',{n:i})+'">×</button></th>'+
+        Array.apply(null,{length:cols}).map(function(_,j){return '<th class="xh">'+(j+idxBase)+'<button class="xb ctl" type="button" data-act="delCol" data-i="'+j+'" aria-label="'+_T('刪除第 {n} 欄',{n:j+idxBase})+'">×</button></th>';}).join('')+'</tr>'+
+        it.rows.map(function(r,i){return '<tr><th class="xh">'+(i+idxBase)+'<button class="xb ctl" type="button" data-act="delRow" data-i="'+i+'" aria-label="'+_T('刪除第 {n} 列',{n:i+idxBase})+'">×</button></th>'+
           r.map(function(c,j){return '<td class="'+((it.hl||[]).indexOf(i+','+j)>=0?'hl':'')+'"'+BG(it,i+','+j)+' contenteditable="true" spellcheck="false" data-r="'+i+'" data-k="'+j+'">'+esc(c)+'</td>';}).join('')+'</tr>';}).join('')+
         _T('</table><button class="addcol ctl" type="button" data-act="addCol" aria-label="加一欄">＋</button><button class="addrow ctl" type="button" data-act="addRow" aria-label="加一列">＋ 列</button></div>');
     case 'var': return '<div class="varbox"'+(it.bg?' style="background:var(--sw'+it.bg+')"':'')+_T('><span class="grip" style="padding:0">⠿</span><span class="vn" contenteditable="true" spellcheck="false" data-f="name" data-ph="名稱">')+esc(it.name)+_T('</span>=<span class="vv" contenteditable="true" spellcheck="false" data-f="value" data-ph="值">')+esc(it.value)+'</span></div>';
@@ -698,7 +700,7 @@ function renderToolbar(){
   if(it.type==='pointer') h+=[['up','↑'],['right','→'],['down','↓'],['left','←']].map(function(d){return '<button type="button" class="dirb" data-act="dir" data-v="'+d[0]+'" aria-pressed="'+((it.dir||'up')===d[0])+_T('" title="箭頭朝')+{up:_T('上'),right:_T('右'),down:_T('下'),left:_T('左')}[d[0]]+_T('（按 R 旋轉）">')+d[1]+'</button>';}).join('')+'<span class="sep2"></span>';
   if(it.type==='pointer') h+=COLORS.map(function(c,i){return '<button type="button" class="sw" style="background:'+c+'" data-act="color" data-v="'+i+_T('" aria-label="顏色 ')+(i+1)+'"></button>';}).join('')+'<span class="sep2"></span>';
   if(CELLY.indexOf(it.type)>=0||NODEY.indexOf(it.type)>=0){
-    var lab=NODEY.indexOf(it.type)>=0?_T('底色'):(activeCell&&activeCell.id===it.id?(activeCell.key.indexOf(',')>=0?_T('這格'):_T('第 {n} 格',{n:activeCell.key})):_T('全部格子'));
+    var lab=NODEY.indexOf(it.type)>=0?_T('底色'):(activeCell&&activeCell.id===it.id?(activeCell.key.indexOf(',')>=0?_T('這格'):_T('第 {n} 格',{n:+activeCell.key+idxBase})):_T('全部格子'));
     h+=swatches(lab);
   }
   if(it.type==='tree') h+=_T('<button type="button" data-act="tidy">整理這棵樹</button>');
@@ -1493,6 +1495,9 @@ $('zout').onclick=function(){var r=board.getBoundingClientRect();zoomAt(r.left+r
 $('zfit').onclick=fit;
 function zoomTo(z){var r=board.getBoundingClientRect();zoomAt(r.left+r.width/2,r.top+r.height/2,z/view.z);persist();}
 $('zv').onclick=function(){popMenu($('zv'),[[_T('放大'),_T('⌘＋'),function(){zoomTo(view.z*1.25);}],[_T('縮小'),'⌘−',function(){zoomTo(view.z/1.25);}],'-',[_T('縮放到 100%'),'⇧0',function(){zoomTo(1);}],[_T('全部看得到'),'⇧1',fit]],'up');};
+$('setBtn').onclick=function(){
+  popMenu($('setBtn'),[0,1].map(function(n){return [_T('陣列 index 從 {n} 開始',{n:n}),idxBase===n?'✓':'',function(){setIdxBase(n);}];}),'up');};
+function setIdxBase(n){if(idxBase===n)return; idxBase=n; try{localStorage.setItem('drycanvas-ib',n);}catch(e){} renderAll(); toast(_T('陣列 index 改成從 {n} 開始',{n:n}));}
 $('helpBtn').onclick=function(){$('help').hidden=!$('help').hidden;};
 function fit(){
   var els=itemsEl.querySelectorAll('.it'); if(!els.length){view={x:40,y:30,z:1};applyView();return;}
