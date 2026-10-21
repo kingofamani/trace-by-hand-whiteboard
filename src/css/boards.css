@@ -1,0 +1,22 @@
+/* 我的白板 */
+.boardbtn{font-weight:700;max-width:280px;overflow:hidden;text-overflow:ellipsis}
+.lclink{font-size:13px;font-weight:700;color:var(--marker);text-decoration:none;white-space:nowrap}
+.lclink:hover{text-decoration:underline}
+.bl{display:flex;flex-direction:column;gap:10px;width:min(640px,calc(100% - 32px));max-height:calc(100% - 40px);background:var(--surface);border-radius:14px;padding:16px;overflow:hidden}
+.bl h3{margin:0;font-size:17px;font-weight:900;display:flex;justify-content:space-between;align-items:center}
+.bl .newrow{display:flex;gap:6px;flex-wrap:wrap;align-items:center;background:var(--surface-2);border-radius:10px;padding:10px}
+.bl input[type=text],.bl input[type=search]{border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:6px 10px;min-width:0}
+.bl .list{overflow-y:auto;border:1px solid var(--line);border-radius:10px;min-height:120px}
+.bl .row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;align-items:center;padding:9px 12px;border-top:1px solid var(--line)}
+.bl .row:first-child{border-top:0}
+.bl .row.cur{background:var(--marker-bg)}
+.bl .row .nm2{font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bl .row .meta2{font-size:12px;color:var(--ink-3);display:flex;gap:8px;flex-wrap:wrap}
+.bl .row .pt{font-size:11px;background:var(--surface-2);border-radius:4px;padding:0 6px;color:var(--ink-2)}
+.bl .acts{display:flex;gap:4px}
+.bl .acts button{border:1px solid var(--line);background:var(--surface);border-radius:6px;padding:3px 9px;font-size:12.5px;cursor:pointer}
+.bl .acts button:hover{border-color:var(--marker)}
+.bl .acts button.pri{background:var(--ink);color:var(--surface);border-color:var(--ink)}
+.bl .acts button.danger{color:var(--red)}
+.bl .acts button.arm{background:var(--red);color:#fff;border-color:var(--red)}
+.bl .none2{padding:24px;text-align:center;color:var(--ink-3);font-size:13px}

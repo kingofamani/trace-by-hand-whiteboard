@@ -1,11 +1,13 @@
-"""Build public/index.html from src/canvas_src.html.
+"""Build public/index.html from src/index.html.
 
+- Inlines src/css/*.css and src/js/*.js where src/index.html has `/* @include css/x.css */` or `// @include js/x.js`
+  (in that order; the JS parts all run inside one function, so they share variables)
 - Embeds the LeetCode problem list (data/problems.csv) into /*PROBLEMS*/[]
 - Embeds UI translations (i18n/<lang>.json, keys = Traditional Chinese source strings) into /*I18N*/{}
 
 Usage: python3 build.py
 """
-import csv, json, os
+import csv, json, os, re
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 LANGS = ['zh-CN', 'en', 'ja', 'ko', 'fr', 'hi']
@@ -16,7 +18,15 @@ with open(os.path.join(HERE, 'data', 'problems.csv'), encoding='utf-8') as f:
         probs.append([int(r['id']), r['title'], r['slug'], r['difficulty']])
 probs.sort()
 
-src = open(os.path.join(HERE, 'src', 'canvas_src.html'), encoding='utf-8').read()
+INCLUDE = re.compile(r'^[ \t]*(?:/\*|//)[ \t]*@include[ \t]+(\S+?)[ \t]*(?:\*/)?[ \t]*\n', re.M)
+used = []
+def include(m):
+    used.append(m.group(1))
+    part = open(os.path.join(HERE, 'src', m.group(1)), encoding='utf-8').read()
+    return part if part.endswith('\n') else part + '\n'
+src = INCLUDE.sub(include, open(os.path.join(HERE, 'src', 'index.html'), encoding='utf-8').read())
+unused = sorted({d + '/' + f for d in ('css', 'js') for f in os.listdir(os.path.join(HERE, 'src', d))} - set(used))
+assert not unused, f'not @include-d in src/index.html: {unused}'
 assert '/*PROBLEMS*/[]' in src and '/*I18N*/{}' in src
 page = src.replace('/*PROBLEMS*/[]', json.dumps(probs, ensure_ascii=False, separators=(',', ':')))
 

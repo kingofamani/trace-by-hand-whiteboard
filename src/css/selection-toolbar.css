@@ -1,0 +1,41 @@
+/* 底色 */
+.cell.hl,table.grid td.hl,table.steps td.hl,.node.hl{background:var(--hl)!important}
+.mt .bgsw{width:15px;height:15px;border-radius:5px;border:1px solid var(--line);padding:0;margin:0 1px;cursor:pointer}
+.mt .bgsw:hover{outline:2px solid var(--marker);outline-offset:1px}
+.mt .bgsw.none{background:linear-gradient(135deg,var(--surface) 45%,var(--red) 45%,var(--red) 55%,var(--surface) 55%)}
+/* 框選 */
+.it.msel{outline:2px solid var(--marker);outline-offset:4px;border-radius:6px;background:color-mix(in oklab,var(--marker-bg) 55%,transparent)}
+svg.layer .stroke.msel{filter:drop-shadow(0 0 3px var(--marker))}
+.marq{position:absolute;border:1.5px dashed var(--marker);background:color-mix(in oklab,var(--marker-bg) 45%,transparent);pointer-events:none;z-index:7;border-radius:3px}
+.mt .cnt{font-size:12px;color:var(--ink-2);padding:0 6px;font-weight:700}
+/* 浮動小工具列 */
+.mt{position:absolute;z-index:6;background:var(--surface);border:1px solid var(--line);border-radius:9px;box-shadow:var(--shadow);padding:3px;display:flex;gap:2px;align-items:center;white-space:nowrap}
+.mt button{border:0;background:none;border-radius:6px;padding:3px 8px;font-size:12.5px;cursor:pointer;color:var(--ink)}
+.mt button:hover{background:var(--surface-2)}
+.mt button.danger{color:var(--red)}
+.mt button[aria-pressed="true"]{background:var(--ink);color:var(--surface)}
+.mt .sep2{width:1px;height:16px;background:var(--line);margin:0 2px}
+.mt .sw{width:18px;height:18px;margin:0 2px}
+.elabel{position:absolute;transform:translate(-50%,-50%);background:var(--paper);font-family:var(--mono);font-size:12px;color:var(--ink-2);padding:0 4px;border-radius:4px;white-space:nowrap;min-width:10px}
+.elabel:focus{background:var(--surface)}
+/* 檢查器 */
+.insp{position:absolute;right:12px;top:12px;width:250px;max-height:calc(100% - 24px);overflow:auto;background:var(--surface);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow);padding:12px;display:flex;flex-direction:column;gap:8px;z-index:5}
+.insp h4{margin:0;font-size:13px;font-weight:900;display:flex;justify-content:space-between;align-items:center}
+.insp .row{display:flex;gap:4px;flex-wrap:wrap;align-items:center}
+.insp input[type=text]{flex:1;min-width:0;border:1px solid var(--line);background:var(--surface);border-radius:6px;padding:4px 8px;font-family:var(--mono);font-size:12.5px}
+.insp .b{border:1px solid var(--line);background:var(--surface);border-radius:6px;padding:3px 9px;cursor:pointer;font-size:12.5px}
+.insp .b:hover{border-color:var(--marker)}
+.insp .b.pri{background:var(--ink);color:var(--surface);border-color:var(--ink)}
+.insp .b.danger{color:var(--red)}
+.insp .hint{font-size:11.5px;color:var(--ink-3);line-height:1.5}
+.insp .lab{font-size:11.5px;font-weight:700;color:var(--ink-2)}
+.sw{width:20px;height:20px;border-radius:50%;border:2px solid var(--surface);box-shadow:0 0 0 1px var(--line);cursor:pointer;padding:0}
+.help{position:absolute;left:12px;bottom:12px;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:8px 12px;font-size:12px;color:var(--ink-2);box-shadow:var(--shadow);max-width:560px;line-height:1.6;z-index:4}
+.help kbd{font-family:var(--mono);font-size:11px;border:1px solid var(--line);border-bottom-width:2px;border-radius:4px;padding:0 4px;background:var(--surface-2)}
+.help button{border:0;background:none;color:var(--ink-3);cursor:pointer;float:right;padding:0 0 0 8px}
+.modal{position:absolute;inset:0;background:rgba(0,0,0,.35);display:grid;place-items:center;z-index:10}
+.modal .box{background:var(--surface);border-radius:12px;padding:16px;width:min(560px,calc(100% - 32px));display:flex;flex-direction:column;gap:10px}
+.modal textarea{width:100%;height:240px;font-family:var(--mono);font-size:12px;border:1px solid var(--line);border-radius:8px;padding:8px;background:var(--surface-2)}
+.toast{position:absolute;left:50%;top:14px;transform:translateX(-50%);background:var(--ink);color:var(--surface);padding:6px 14px;border-radius:999px;font-size:13px;z-index:11;pointer-events:none}
+@media (max-width:720px){.palette{width:112px}.insp{width:210px}.help{display:none}}
+

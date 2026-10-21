@@ -1,0 +1,32 @@
+/* 元件上的直接編輯控制 */
+.ctl{display:none!important}
+.it.sel .ctl{display:inline-flex!important}
+.it.sel tr.ctl{display:table-row!important}
+.it.sel td.ctl,.it.sel th.ctl{display:table-cell!important}
+.cw{position:relative}
+.xb{position:absolute;top:-8px;right:-8px;width:18px;height:18px;border-radius:50%;border:1px solid var(--line);background:var(--surface);color:var(--red);font-size:12px;line-height:1;cursor:pointer;padding:0;align-items:center;justify-content:center;visibility:hidden;z-index:2}
+.it.sel .cw:hover>.xb,.it.sel .xrow:hover .xb,.it.sel .xh:hover .xb,.it.sel .chipw:hover>.xb{visibility:visible}
+.addc{min-width:34px;height:40px;border:2px dashed var(--ink-3);border-radius:6px;background:transparent;color:var(--ink-3);font-size:18px;cursor:pointer;align-items:center;justify-content:center;align-self:flex-end}
+.addc:hover{border-color:var(--marker);color:var(--marker)}
+.slot{border-style:dashed!important;border-color:var(--ink-3)!important;color:var(--ink-3);font-weight:500!important;font-size:13px!important;min-width:70px}
+.slot:focus{color:var(--ink);border-color:var(--marker)!important;font-weight:700!important}
+[data-ph]:empty::before{content:attr(data-ph);color:var(--ink-3);font-weight:500;font-size:12.5px;pointer-events:none}
+.txt[data-ph]:empty::before,.note[data-ph]:empty::before{font-size:inherit;font-weight:inherit;opacity:.8}
+.subctl{gap:4px;margin-top:6px}
+.sb{border:1px solid var(--line);background:var(--surface);border-radius:6px;padding:1px 8px;font-size:12px;cursor:pointer;color:var(--ink-2);white-space:nowrap}
+.sb:hover{border-color:var(--marker);color:var(--marker)}
+.gwrap{display:grid;grid-template-columns:auto auto;gap:4px;align-items:stretch}
+.addcol{width:24px;border:2px dashed var(--ink-3);border-radius:6px;background:transparent;color:var(--ink-3);cursor:pointer;align-items:center;justify-content:center;font-size:16px}
+.addrow{height:24px;border:2px dashed var(--ink-3);border-radius:6px;background:transparent;color:var(--ink-3);cursor:pointer;align-items:center;justify-content:center;font-size:13px;grid-column:1}
+.addcol:hover,.addrow:hover{border-color:var(--marker);color:var(--marker)}
+.xh{position:relative}
+.xh .xb{top:-6px;right:-10px}
+td.xrow{border:0!important;padding:0 0 0 4px!important;min-width:0!important;position:relative;width:20px}
+td.xrow .xb{position:static;visibility:hidden}
+.it.sel tr:hover td.xrow .xb{visibility:visible}
+.chipw{position:relative;display:inline-flex}
+.chipw .xb{top:-8px;right:-6px}
+.nodew{position:relative;display:inline-block}
+.np{position:absolute;width:22px;height:22px;border-radius:50%;border:1.5px dashed var(--marker);background:var(--surface);color:var(--marker);font-size:14px;font-weight:700;cursor:pointer;padding:0;align-items:center;justify-content:center;z-index:2}
+.np:hover{background:var(--marker);color:var(--surface);border-style:solid}
+.np.l{left:-20px;bottom:-22px} .np.r{right:-20px;bottom:-22px} .np.nx{right:-28px;top:11px} .np.adj{right:-26px;top:-12px}
