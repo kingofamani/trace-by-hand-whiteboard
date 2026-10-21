@@ -1,5 +1,5 @@
 {
-  "__help__": "<button type=\"button\" id=\"helpX\" aria-label=\"Close help\">×</button>\n      <b>Basics</b>: click or drag a component from the left onto the canvas. When a component is selected, <b>＋</b> and <b>×</b> appear right on it; drag the gray bar on top to move it.<br>\n      <b>Typing</b>: in an array type <kbd>2 7 11</kbd> (space or comma jumps to the next cell); in a string each character fills its own cell; press <kbd>⌫</kbd> in an empty cell to go back one cell.<br>\n      <b>Select</b>: drag on empty space. <kbd>⌥</kbd> (Alt) + drag = drag out a copy, <kbd>⌘D</kbd> duplicates the group below, <kbd>⌘C</kbd>/<kbd>⌘V</kbd> pastes at the mouse position, <kbd>Delete</kbd> deletes, <kbd>Shift</kbd> + click a component to add it to the selection.<br>\n      <b>Shapes</b>: in the bottom toolbar, rectangle <kbd>R</kbd>, circle <kbd>O</kbd>, line <kbd>L</kbd>, arrow <kbd>⇧L</kbd>; drag to draw, hold <kbd>Shift</kbd> for a square / perfect circle / 45°. Click a shape to select, move, or recolor it.<br>\n      <b>Layers</b>: with something selected, <kbd>⌘]</kbd> bring forward, <kbd>⌘[</kbd> send backward, <kbd>⌘⌥]</kbd> bring to front, <kbd>⌘⌥[</kbd> send to back (also ⤒ ⤓ in the toolbar).<br>\n      <b>Highlight</b>: <kbd>Shift</kbd> + click a cell = yellow, <kbd>Alt</kbd> + click a cell = faded.<br>\n      <b>View</b>: Space + drag or trackpad to pan; <kbd>⌘</kbd> + scroll wheel to zoom; <kbd>⇧1</kbd> fit all, <kbd>⇧0</kbd> 100%.",
+  "__help__": "<button type=\"button\" id=\"helpX\" aria-label=\"Close help\">×</button>\n      <b>Basics</b>: click or drag a component from the left onto the canvas. When a component is selected, <b>＋</b> and <b>×</b> appear right on it; drag the gray bar on top to move it.<br>\n      <b>Typing</b>: in an array type <kbd>2 7 11</kbd> (space or comma jumps to the next cell); in a string each character fills its own cell; press <kbd>⌫</kbd> in an empty cell to go back one cell.<br>\n      <b>Select</b>: drag on empty space. <kbd>⌥</kbd> (Alt) + drag = drag out a copy, <kbd>⌘D</kbd> duplicates the group below, <kbd>⌘C</kbd>/<kbd>⌘V</kbd> pastes at the mouse position, <kbd>Delete</kbd> deletes, <kbd>Shift</kbd> + click a component to add it to the selection.<br>\n      <b>Shapes</b>: in the bottom toolbar, rectangle <kbd>R</kbd>, circle <kbd>O</kbd>, line <kbd>L</kbd>, arrow <kbd>⇧L</kbd>; drag to draw, hold <kbd>Shift</kbd> for a square / perfect circle / 45°. Click a shape to select, move, or recolor it.<br>\n      <b>Layers</b>: with something selected, <kbd>⌘]</kbd> bring forward, <kbd>⌘[</kbd> send backward, <kbd>⌘⌥]</kbd> bring to front, <kbd>⌘⌥[</kbd> send to back (also ⤒ ⤓ in the toolbar).<br>\n      <b>Highlight</b>: <kbd>Shift</kbd> + click a cell = yellow, <kbd>Alt</kbd> + click a cell = faded.<br>\n      <b>Groups</b>: after box-selecting, press <kbd>⌘G</kbd> to group and <kbd>⇧⌘G</kbd> to ungroup; click once to select the whole group, click again to pick one item. Drag a component back onto the left panel to delete it.<br>\n<b>View</b>: Space + drag or trackpad to pan; <kbd>⌘</kbd> + scroll wheel to zoom; <kbd>⇧1</kbd> fit all, <kbd>⇧0</kbd> 100%.",
   "手動跑題白板": "Trace-by-Hand Whiteboard",
   "瀏覽器空間滿了，這次沒有存到。可以刪掉幾個舊白板，或用匯出備份。": "Browser storage is full, so this wasn't saved. Delete some old boards or export a backup.",
   "欄 1": "Column 1",
@@ -205,5 +205,21 @@
   "陣列 index 改成從 {n} 開始": "Array index now starts at {n}",
   "風格：淺色": "Theme: Light",
   "風格：深色": "Theme: Dark",
-  "風格：跟著系統": "Theme: System"
+  "風格：跟著系統": "Theme: System",
+  "名稱位置：上": "Name position: Top",
+  "名稱位置：下": "Name position: Bottom",
+  "名稱位置：左": "Name position: Left",
+  "名稱位置：右": "Name position: Right",
+  "跟著預設": "Use default",
+  "名稱位置": "Name position",
+  "放開就刪除": "Release to delete",
+  "已刪除，可以按 ⌘Z 找回來": "Deleted. Press ⌘Z to undo",
+  "群組（{n} 個）": "Group ({n})",
+  "群組（⌘G）": "Group (⌘G)",
+  "群組": "Group",
+  "取消群組（⇧⌘G）": "Ungroup (⇧⌘G)",
+  "取消群組": "Ungroup",
+  "移出群組": "Remove from group",
+  "已群組 {n} 個": "Grouped {n} items",
+  "已取消群組": "Ungrouped"
 }

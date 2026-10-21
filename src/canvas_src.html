@@ -64,6 +64,12 @@ svg.layer .ahead{stroke:none;pointer-events:none}
 .grip{font-size:11px;color:var(--ink-3);cursor:move;padding:0 2px 3px;display:flex;gap:6px;align-items:center;font-family:var(--mono);white-space:nowrap}
 .grip .nm{color:var(--ink);font-weight:700;cursor:text;min-width:10px;outline:none;border-radius:3px;padding:0 2px}
 .grip .nm:focus{background:var(--surface);box-shadow:0 0 0 1px var(--line)}
+.it[data-lp="bottom"]{display:flex;flex-direction:column-reverse}
+.it[data-lp="left"]{display:flex;align-items:center}
+.it[data-lp="right"]{display:flex;flex-direction:row-reverse;align-items:center}
+.it[data-lp="bottom"]>.grip{padding:3px 2px 0}
+.it[data-lp="left"]>.grip{padding:0 6px 0 2px}
+.it[data-lp="right"]>.grip{padding:0 2px 0 6px}
 [contenteditable]{outline:none;cursor:text}
 [contenteditable]:focus{box-shadow:inset 0 0 0 2px var(--marker)}
 .txt{min-width:120px;max-width:640px;padding:6px 8px;border:1px dashed transparent;border-radius:6px;white-space:pre-wrap;line-height:1.55}
@@ -208,6 +214,8 @@ body{display:block;background:var(--canvas);font-size:13px}
 .app{display:flex;height:100%}
 .sr{position:absolute;left:-9999px}
 .palette{width:240px;flex:none;background:var(--panel);border-right:1px solid var(--panel-line);display:flex;flex-direction:column;padding:0;gap:0;overflow:hidden}
+.palette.trash{position:relative}
+.palette.trash::after{content:attr(data-trash);position:absolute;inset:0;display:grid;place-items:center;background:color-mix(in oklab,var(--red) 16%,var(--panel));box-shadow:inset 0 0 0 2px var(--red);color:var(--red);font-weight:700;font-size:15px;pointer-events:none;z-index:5}
 .phead{padding:12px 12px 10px;border-bottom:1px solid var(--panel-line);display:flex;flex-direction:column;gap:4px}
 .boardbtn{border:0;background:none;text-align:left;font-weight:700;font-size:14px;color:var(--ui-text);padding:5px 6px;border-radius:6px;cursor:pointer;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .boardbtn:hover{background:var(--hover)}
@@ -342,6 +350,7 @@ table.grid .ax{display:inline-block;min-width:12px;padding:0 2px;border-radius:3
       <b>形狀</b>：下方工具列的矩形 <kbd>R</kbd>、圓形 <kbd>O</kbd>、直線 <kbd>L</kbd>、箭頭 <kbd>⇧L</kbd>，拖曳畫出來，按住 <kbd>Shift</kbd> 畫正方形／正圓／45 度。點一下形狀就能選取、拖動、換顏色。<br>
       <b>圖層</b>：選取後 <kbd>⌘]</kbd> 往上一層、<kbd>⌘[</kbd> 往下一層、<kbd>⌘⌥]</kbd> 最上層、<kbd>⌘⌥[</kbd> 最下層（工具列也有 ⤒ ⤓）。<br>
       <b>標記</b>：<kbd>Shift</kbd>＋點格子＝標黃，<kbd>Alt</kbd>＋點格子＝變淡。<br>
+      <b>群組</b>：框選後按 <kbd>⌘G</kbd> 群組、<kbd>⇧⌘G</kbd> 取消群組；點一下選整組，再點一下才是單選。把元件拖回左邊的元件列就會刪除。<br>
       <b>畫面</b>：空白鍵＋拖曳或觸控板移動；<kbd>⌘</kbd>＋滾輪縮放；<kbd>⇧1</kbd> 全部看得到、<kbd>⇧0</kbd> 100%。
     </div>
   </div>
@@ -387,6 +396,9 @@ var B={items:[],edges:[],strokes:[],seq:1};
 var view={x:40,y:30,z:1};
 var activeCell=null;
 var idxBase=0; try{idxBase=localStorage.getItem('drycanvas-ib')==='1'?1:0;}catch(e){} // 陣列 index 從 0 或 1 開始（全部白板共用）；只影響顯示，格子的 key 一律從 0 算
+var LPY=['array','string','stack','queue','dict','set','grid'], LPS={top:'↑',bottom:'↓',left:'←',right:'→'}; // 有名稱的元件；名稱可以放上下左右
+var lpDef='top'; try{var lp0=localStorage.getItem('drycanvas-lp');if(LPS[lp0])lpDef=lp0;}catch(e){} // 名稱位置的預設（全部白板共用），元件自己有設 it.lp 就用自己的
+function lpOf(it){return it.lp||lpDef;}
 var msel=[], mstk=[], clip=null, mouseW={x:0,y:0}, marq=null;
 var tool='select', sel=null, selEdge=null, connSrc=null, hist=[], fut=[], space=false;
 var $=function(id){return document.getElementById(id);};
@@ -519,6 +531,11 @@ function renderItem(it){
   if(!el){el=document.createElement('div');el.className='it';el.dataset.id=it.id;itemsEl.appendChild(el);}
   el.style.left=it.x+'px'; el.style.top=it.y+'px'; el.style.zIndex=(it.z||0)+1;
   el.innerHTML=itemHtml(it);
+  if(LPY.indexOf(it.type)>=0){ // 名稱以外的部分包成一塊，名稱放上下左右交給 CSS 排
+    var bd=document.createElement('div'); bd.className='ibody';
+    [].slice.call(el.children).forEach(function(c){if(!c.classList.contains('grip'))bd.appendChild(c);}); el.appendChild(bd);
+    el.dataset.lp=lpOf(it);
+  }
   el.classList.toggle('sel',sel===it.id);
   el.classList.toggle('connsrc',connSrc===it.id);
   el.classList.toggle('msel',msel.indexOf(it.id)>=0);
@@ -657,14 +674,14 @@ function duplicate(id){
   var it=byId(id); if(!it) return;
   var el=itemsEl.querySelector('[data-id="'+id+'"]'); var h=el?el.offsetHeight:60, w=el?el.offsetWidth:100;
   var vertical=['array','string','queue','grid','steps','text','var','dict','set'].indexOf(it.type)>=0;
-  var c=clone(it); c.id=nid(); delete c.z; c.x=it.x+(vertical?0:w+30); c.y=it.y+(vertical?h+26:0);
+  var c=clone(it); c.id=nid(); delete c.z; delete c.g; c.x=it.x+(vertical?0:w+30); c.y=it.y+(vertical?h+26:0);
   B.items.push(c);
   // 指到這個陣列的指標也一起複製
   if(it.type==='array'||it.type==='string'){
     var r=el.getBoundingClientRect();
     B.items.filter(function(p){return p.type==='pointer';}).forEach(function(p){
       var pe=itemsEl.querySelector('[data-id="'+p.id+'"]'); if(!pe) return; var q=pe.getBoundingClientRect();
-      if(q.left+q.width/2>=r.left-10&&q.left+q.width/2<=r.right+10&&q.top>=r.bottom-8&&q.top<=r.bottom+50){var pc=clone(p);pc.id=nid();pc.y+=h+26;B.items.push(pc);}
+      if(q.left+q.width/2>=r.left-10&&q.left+q.width/2<=r.right+10&&q.top>=r.bottom-8&&q.top<=r.bottom+50){var pc=clone(p);pc.id=nid();delete pc.g;pc.y+=h+26;B.items.push(pc);}
     });
   }
   sel=c.id; renderAll(); commit(); toast(_T('已複製一份，改有變的地方就好'));
@@ -693,7 +710,7 @@ function renderToolbar(){
     M.innerHTML='<button type="button" data-act="toggleDir">'+(e.dir?_T('→ 有箭頭'):_T('— 沒箭頭'))+_T('</button><button type="button" data-act="flip">⇄ 反轉</button><button type="button" data-act="edgeLabel">T 文字</button><span class="sep2"></span><button type="button" class="danger" data-act="delEdge">刪除</button>');
     M.hidden=false; placeToolbar(); return;}
   if(msel.length+mstk.length>1||(msel.length===0&&mstk.length)){
-    M.innerHTML='<span class="cnt">'+_T('已選 {n} 個',{n:msel.length+mstk.length})+'</span><span class="sep2"></span>'+(msel.length?swatches(_T('底色')):'<span class="cnt">'+(mstk.some(function(i){var t=B.strokes[i]&&B.strokes[i].t;return t==='rect'||t==='ellipse';})?_T('邊框'):_T('線條'))+'</span>'+COLORS.map(function(c,i){return '<button type="button" class="sw" style="background:'+c+'" data-act="scolor" data-v="'+i+_T('" aria-label="線條顏色 ')+(i+1)+'"></button>';}).join('')+'<span class="sep2"></span>'+(mstk.some(function(i){var t=B.strokes[i]&&B.strokes[i].t;return t==='rect'||t==='ellipse';})?fillSwatches():''))+_T('<button type="button" data-act="zfront" title="移到最上層（⌘⌥]）" aria-label="移到最上層">⤒</button><button type="button" data-act="zback" title="移到最下層（⌘⌥[）" aria-label="移到最下層">⤓</button><span class="sep2"></span><button type="button" class="danger" data-act="gdel" title="刪除（Delete）" aria-label="刪除">✕</button>');
+    M.innerHTML='<span class="cnt">'+(isOneGroup()?_T('群組（{n} 個）',{n:msel.length+mstk.length}):_T('已選 {n} 個',{n:msel.length+mstk.length}))+'</span><span class="sep2"></span>'+(msel.length?swatches(_T('底色')):'<span class="cnt">'+(mstk.some(function(i){var t=B.strokes[i]&&B.strokes[i].t;return t==='rect'||t==='ellipse';})?_T('邊框'):_T('線條'))+'</span>'+COLORS.map(function(c,i){return '<button type="button" class="sw" style="background:'+c+'" data-act="scolor" data-v="'+i+_T('" aria-label="線條顏色 ')+(i+1)+'"></button>';}).join('')+'<span class="sep2"></span>'+(mstk.some(function(i){var t=B.strokes[i]&&B.strokes[i].t;return t==='rect'||t==='ellipse';})?fillSwatches():''))+groupBtns()+_T('<button type="button" data-act="zfront" title="移到最上層（⌘⌥]）" aria-label="移到最上層">⤒</button><button type="button" data-act="zback" title="移到最下層（⌘⌥[）" aria-label="移到最下層">⤓</button><span class="sep2"></span><button type="button" class="danger" data-act="gdel" title="刪除（Delete）" aria-label="刪除">✕</button>');
     M.hidden=false; placeToolbar(); return;}
   var it=sel&&byId(sel); if(!it){M.hidden=true;return;}
   var h='';
@@ -708,6 +725,8 @@ function renderToolbar(){
   if(it.type==='tree'||it.type==='list'||it.type==='gnode') h+='<span class="sep2"></span>';
   if(it.type==='array'||it.type==='string') h+=_T('<button type="button" data-act="addPtr" title="加一個指標。Shift＋點格子＝標黃，Alt＋點格子＝變淡">＋指標</button>')+((it.hl||[]).length||(it.done||[]).length?_T('<button type="button" data-act="clearHl">清除標記</button>'):'')+'<span class="sep2"></span>';
   if((it.type==='grid'||it.type==='steps')&&(it.hl||[]).length) h+=_T('<button type="button" data-act="clearHl">清除標記</button><span class="sep2"></span>');
+  if(LPY.indexOf(it.type)>=0) h+='<button type="button" data-act="lpMenu" title="'+_T('名稱位置')+'">'+_T('名稱')+' '+LPS[lpOf(it)]+'</button><span class="sep2"></span>';
+  if(it.g) h+='<button type="button" data-act="ungroup">'+_T('移出群組')+'</button><span class="sep2"></span>';
   h+=_T('<button type="button" data-act="zfront" title="移到最上層（⌘⌥]；往上一層 ⌘]）" aria-label="移到最上層">⤒</button><button type="button" data-act="zback" title="移到最下層（⌘⌥[；往下一層 ⌘[）" aria-label="移到最下層">⤓</button><span class="sep2"></span>');
   h+=_T('<button type="button" data-act="dup" title="複製一份（⌘D）" aria-label="複製一份">⧉</button><button type="button" data-act="connFrom" title="從這裡拉一條線" aria-label="連線">→</button><button type="button" class="danger" data-act="del" title="刪除（Delete）" aria-label="刪除">✕</button>');
   M.innerHTML=h; M.hidden=false; placeToolbar();
@@ -795,6 +814,7 @@ function act(a,v,i){
   if(a==='scolor'){mstk.forEach(function(i){if(B.strokes[i])B.strokes[i].c=+v;});penColor=+v;try{localStorage.setItem('drycanvas-color',v);}catch(e){}paintCdot();renderStrokes();commit();return;}
   if(a==='zfront'){reorder('front');return;} if(a==='zback'){reorder('back');return;}
   if(a==='gdup'){dupGroup();return;} if(a==='gcopy'){copyGroup();return;} if(a==='gdel'){delGroup();return;}
+  if(a==='group'){groupSel();return;} if(a==='ungroup'){ungroupSel();return;}
   var it=byId(sel); if(!it) return;
   switch(a){
     case 'dup': duplicate(it.id); return;
@@ -825,6 +845,7 @@ function act(a,v,i){
     case 'color': it.color=+v; break;
     case 'dir': it.dir=v; break;
     case 'style': it.style=v; break;
+    case 'lpMenu': lpMenu(it); return;
   }
   renderAll(); commit();
 }
@@ -892,7 +913,7 @@ function buildList(head,vals){
 function delItem(id){
   B.items=B.items.filter(function(x){return x.id!==id;});
   B.edges=B.edges.filter(function(e){return e.from!==id&&e.to!==id;});
-  if(sel===id) sel=null; renderAll(); commit();
+  pruneGroups(); if(sel===id) sel=null; renderAll(); commit();
 }
 
 /* ---------- 框選、多選 ---------- */
@@ -909,6 +930,29 @@ function setMulti(ids,stk){
   if(msel.length===1&&!mstk.length){sel=msel[0];msel=[];} else sel=null;
   selEdge=null; renderAll();
 }
+/* 群組：元件和筆跡用同一個 g 綁在一起，點一個就選整組 */
+function gMembers(g){return {ids:B.items.filter(function(x){return x.g===g;}).map(function(x){return x.id;}),stk:B.strokes.map(function(s,i){return s.g===g?i:-1;}).filter(function(i){return i>=0;})};}
+function withGroups(ids,stk){ // 選到群組裡的一個，就把整組帶進來
+  var gs={}; ids.forEach(function(id){var o=byId(id);if(o&&o.g)gs[o.g]=1;}); stk.forEach(function(i){var s=B.strokes[i];if(s&&s.g)gs[s.g]=1;});
+  Object.keys(gs).forEach(function(g){var m=gMembers(g);m.ids.forEach(function(id){if(ids.indexOf(id)<0)ids.push(id);});m.stk.forEach(function(i){if(stk.indexOf(i)<0)stk.push(i);});});
+  return {ids:ids,stk:stk};
+}
+function selGroups(){var gs={};groupIds().forEach(function(id){var o=byId(id);gs[o&&o.g||'']=1;});mstk.forEach(function(i){var s=B.strokes[i];gs[s&&s.g||'']=1;});return Object.keys(gs);} // '' 代表沒群組的
+function isOneGroup(){var gs=selGroups(); if(gs.length!==1||!gs[0]) return false; var m=gMembers(gs[0]); return m.ids.length+m.stk.length===groupIds().length+mstk.length;}
+function groupBtns(){var n=groupIds().length+mstk.length;
+  return (n>1&&!isOneGroup()?'<button type="button" data-act="group" title="'+_T('群組（⌘G）')+'">'+_T('群組')+'</button>':'')+
+    (selGroups().some(Boolean)?'<button type="button" data-act="ungroup" title="'+_T('取消群組（⇧⌘G）')+'">'+_T('取消群組')+'</button>':'')+'<span class="sep2"></span>';}
+function groupSel(){
+  var ids=groupIds(), n=ids.length+mstk.length; if(n<2||isOneGroup()) return;
+  var g=nid(); ids.forEach(function(id){byId(id).g=g;}); mstk.forEach(function(i){B.strokes[i].g=g;});
+  renderAll(); commit(); toast(_T('已群組 {n} 個',{n:n}));
+}
+function ungroupSel(){
+  var any=false; groupIds().forEach(function(id){var o=byId(id);if(o&&o.g){delete o.g;any=true;}}); mstk.forEach(function(i){var s=B.strokes[i];if(s&&s.g){delete s.g;any=true;}});
+  if(!any) return; pruneGroups(); renderAll(); commit(); toast(_T('已取消群組'));
+}
+function pruneGroups(){var all=B.items.concat(B.strokes),cnt={};all.forEach(function(o){if(o.g)cnt[o.g]=(cnt[o.g]||0)+1;});all.forEach(function(o){if(o.g&&cnt[o.g]<2)delete o.g;});} // 只剩一個的群組就拆掉
+function freshGroups(list){var m={};list.forEach(function(o){if(o.g)o.g=m[o.g]||(m[o.g]=nid());});pruneGroups();} // 複製出來的另成一組，不會混進原本的群組
 function packGroup(){ // 把選到的東西（含它們之間的連線、選到的筆跡）打包
   var ids=groupIds(), set={}; ids.forEach(function(i){set[i]=1;});
   return {items:clone(B.items.filter(function(x){return set[x.id];})),
@@ -916,11 +960,11 @@ function packGroup(){ // 把選到的東西（含它們之間的連線、選到�
           strokes:clone(mstk.map(function(i){return B.strokes[i];}).filter(Boolean))};
 }
 function pasteGroup(pk,dx,dy){
-  var map={}, newIds=[], newStk=[];
-  pk.items.forEach(function(it){var c=clone(it);map[it.id]=c.id=nid();delete c.z;c.x+=dx;c.y+=dy;B.items.push(c);newIds.push(c.id);});
+  var map={}, newIds=[], newStk=[], fresh=[];
+  pk.items.forEach(function(it){var c=clone(it);map[it.id]=c.id=nid();delete c.z;c.x+=dx;c.y+=dy;B.items.push(c);newIds.push(c.id);fresh.push(c);});
   pk.edges.forEach(function(e){var c=clone(e);c.id=nid();c.from=map[e.from];c.to=map[e.to];B.edges.push(c);});
-  pk.strokes.forEach(function(st){B.strokes.push({t:st.t,c:st.c,f:st.f,p:st.p.map(function(q){return [q[0]+dx,q[1]+dy];})});newStk.push(B.strokes.length-1);});
-  setMulti(newIds,newStk); commit();
+  pk.strokes.forEach(function(st){var ns={t:st.t,c:st.c,f:st.f,g:st.g,p:st.p.map(function(q){return [q[0]+dx,q[1]+dy];})};B.strokes.push(ns);fresh.push(ns);newStk.push(B.strokes.length-1);});
+  freshGroups(fresh); setMulti(newIds,newStk); commit();
 }
 function packBox(pk){ // 世界座標的外框
   var x1=1e9,y1=1e9,x2=-1e9,y2=-1e9;
@@ -929,11 +973,11 @@ function packBox(pk){ // 世界座標的外框
   return {x:x1,y:y1,w:x2-x1,h:y2-y1};
 }
 function dupInPlace(pk){ // 在原位置複製一份，回傳新的 id（不存檔，拖完才存）
-  var map={}, ids=[], stk=[];
-  pk.items.forEach(function(it){var c=clone(it);map[it.id]=c.id=nid();delete c._snap;delete c.z;B.items.push(c);ids.push(c.id);});
+  var map={}, ids=[], stk=[], fresh=[];
+  pk.items.forEach(function(it){var c=clone(it);map[it.id]=c.id=nid();delete c._snap;delete c.z;B.items.push(c);ids.push(c.id);fresh.push(c);});
   pk.edges.forEach(function(e){var c=clone(e);c.id=nid();c.from=map[e.from];c.to=map[e.to];B.edges.push(c);});
-  pk.strokes.forEach(function(st){B.strokes.push({t:st.t,c:st.c,f:st.f,p:st.p.map(function(q){return [q[0],q[1]];})});stk.push(B.strokes.length-1);});
-  return {ids:ids,stk:stk};
+  pk.strokes.forEach(function(st){var ns={t:st.t,c:st.c,f:st.f,g:st.g,p:st.p.map(function(q){return [q[0],q[1]];})};B.strokes.push(ns);fresh.push(ns);stk.push(B.strokes.length-1);});
+  freshGroups(fresh); return {ids:ids,stk:stk};
 }
 function dupGroup(){
   if(!groupIds().length&&!mstk.length) return;
@@ -952,7 +996,7 @@ function delGroup(){
   B.items=B.items.filter(function(x){return !set[x.id];});
   B.edges=B.edges.filter(function(e){return !set[e.from]&&!set[e.to];});
   if(mstk.length){var ks={};mstk.forEach(function(i){ks[i]=1;});B.strokes=B.strokes.filter(function(_,i){return !ks[i];});}
-  clearMulti(); sel=null; renderAll(); commit();
+  pruneGroups(); clearMulti(); sel=null; renderAll(); commit();
 }
 function finishMarquee(){
   var r=marq.rect; marq.el.remove(); var m=marq; marq=null;
@@ -961,7 +1005,7 @@ function finishMarquee(){
   [].forEach.call(itemsEl.querySelectorAll('.it'),function(el){var q=el.getBoundingClientRect();if(q.right>R.l&&q.left<R.r&&q.bottom>R.t&&q.top<R.b)ids.push(el.dataset.id);});
   [].forEach.call(itemsEl.querySelectorAll('.stroke[data-s]'),function(el){var q=el.getBoundingClientRect();if(q.left>=R.l&&q.right<=R.r&&q.top>=R.t&&q.bottom<=R.b)stk.push(+el.dataset.s);});
   if(m.add){groupIds().forEach(function(i){if(ids.indexOf(i)<0)ids.push(i);});mstk.forEach(function(i){if(stk.indexOf(i)<0)stk.push(i);});}
-  setMulti(ids,stk);
+  var w=withGroups(ids,stk); setMulti(w.ids,w.stk);
 }
 
 /* ---------- 指標吸附到格子 ---------- */
@@ -972,6 +1016,8 @@ function snapPointer(p,cellEl){
   var w=pe?pe.offsetWidth:20, h=pe?pe.offsetHeight:34, dir=p.dir||'up';
   // 同一格同一邊已經有其他指標就往外排
   var others=B.items.filter(function(o){return o.type==='pointer'&&o.id!==p.id&&(o.dir||'up')===dir&&o._snap===cellKey(cellEl);}).length;
+  var ie=cellEl.closest('.it'), gp=dir==='up'&&ie&&ie.dataset.lp==='bottom'&&ie.querySelector('.grip'); // 名稱在下方：往上指的指標排到名稱下面，才不會蓋住名稱
+  if(gp) Bm=Math.max(Bm,(gp.getBoundingClientRect().bottom-br.top)/z);
   if(dir==='up'){p.x=Math.round(cx-w/2);p.y=Math.round(Bm+2+others*34);}
   else if(dir==='down'){p.x=Math.round(cx-w/2);p.y=Math.round(T-h-2-others*34);}
   else if(dir==='left'){p.x=Math.round(R+3);p.y=Math.round(cy-h/2+others*20);}
@@ -992,6 +1038,11 @@ function nearCell(p){ // 最靠近指標箭頭那一端的格子
 
 /* ---------- 滑鼠：拖曳、選取、連線、畫筆 ---------- */
 var drag=null;
+// 把元件拖回左邊元件列＝刪除
+$('palette').dataset.trash=_T('放開就刪除');
+function overPalette(e){var r=$('palette').getBoundingClientRect();return e.clientX>=r.left&&e.clientX<r.right&&e.clientY>=r.top&&e.clientY<r.bottom;}
+function markTrash(on){$('palette').classList.toggle('trash',!!on);}
+function dropDelete(ids,stk){msel=ids; mstk=stk; sel=null; delGroup(); toast(_T('已刪除，可以按 ⌘Z 找回來'));}
 board.addEventListener('pointerdown',function(e){
   if(e.target.closest('.help')||e.target.closest('.modal')||e.target.closest('.dock')||e.target.closest('.navi')) return;
   var ab=e.target.closest('[data-act]');
@@ -1019,7 +1070,7 @@ board.addEventListener('pointerdown',function(e){
   var stEl=!itEl&&e.target.closest&&e.target.closest('.stroke[data-s]');
   if(stEl){ var si=+stEl.dataset.s; e.preventDefault(); if(document.activeElement&&document.activeElement.blur)document.activeElement.blur();
     if(e.shiftKey){var cs=mstk.slice(),at3=cs.indexOf(si);if(at3>=0)cs.splice(at3,1);else cs.push(si);setMulti(groupIds(),cs);return;}
-    if(mstk.indexOf(si)<0){ setMulti([],[si]); }
+    if(mstk.indexOf(si)<0){ var sw=withGroups([],[si]); setMulti(sw.ids,sw.stk); }
     drag={group:true,alt:e.altKey,id:null,sx:e.clientX,sy:e.clientY,moved:false,el:null,
       orig:msel.map(function(i){var o=byId(i);return {id:i,x:o.x,y:o.y};}),sorig:mstk.map(function(i){return {i:i,p:clone(B.strokes[i].p)};})};
     board.setPointerCapture(e.pointerId); return; }
@@ -1045,7 +1096,10 @@ board.addEventListener('pointerdown',function(e){
     var at=arr.indexOf(keyv); if(at>=0) arr.splice(at,1); else arr.push(keyv);
     sel=it.id; renderAll(); commit(); return;
   }
-  if(e.shiftKey&&!cell){ e.preventDefault(); var cur=groupIds(), at2=cur.indexOf(it.id); if(at2>=0) cur.splice(at2,1); else cur.push(it.id); setMulti(cur,mstk); return; }
+  if(e.shiftKey&&!cell){ e.preventDefault(); var cur=groupIds(), cs2=mstk.slice(), on=cur.indexOf(it.id)>=0, mem=it.g?gMembers(it.g):{ids:[it.id],stk:[]}; // 群組裡的就整組一起加選／取消
+    mem.ids.forEach(function(id){var k=cur.indexOf(id);if(on&&k>=0)cur.splice(k,1);else if(!on&&k<0)cur.push(id);});
+    mem.stk.forEach(function(i){var k=cs2.indexOf(i);if(on&&k>=0)cs2.splice(k,1);else if(!on&&k<0)cs2.push(i);});
+    setMulti(cur,cs2); return; }
   // 點到已經被框選的元件：拖曳時整組一起動
   if(msel.indexOf(it.id)>=0){
     var multi=msel.length+mstk.length>1;
@@ -1053,6 +1107,14 @@ board.addEventListener('pointerdown',function(e){
     if(multi||isN||onG||txt){ e.preventDefault(); drag={group:true,alt:e.altKey,id:it.id,tapEl:e.target,sx:e.clientX,sy:e.clientY,moved:false,el:itEl,
       orig:msel.map(function(i){var o=byId(i);return {id:i,x:o.x,y:o.y};}),sorig:mstk.map(function(i){return {i:i,p:clone(B.strokes[i].p)};})};
       board.setPointerCapture(e.pointerId); return; }
+  }
+  // 群組：第一次點選整組（可以直接拖）；選好之後再點一下才是單選這一個，方便編輯
+  var gm=it.g&&!(sel&&byId(sel)&&byId(sel).g===it.g)&&gMembers(it.g);
+  if(gm&&gm.ids.length+gm.stk.length>1){
+    e.preventDefault(); if(document.activeElement&&document.activeElement.blur)document.activeElement.blur(); setMulti(gm.ids,gm.stk);
+    drag={group:true,keep:true,alt:e.altKey,id:it.id,sx:e.clientX,sy:e.clientY,moved:false,el:itEl,
+      orig:msel.map(function(i){var o=byId(i);return {id:i,x:o.x,y:o.y};}),sorig:mstk.map(function(i){return {i:i,p:clone(B.strokes[i].p)};})};
+    board.setPointerCapture(e.pointerId); return;
   }
   if(msel.length||mstk.length){clearMulti();itemsEl.querySelectorAll('.it.msel').forEach(function(x){x.classList.remove('msel');});renderStrokes();}
   if(!cell&&activeCell&&activeCell.id===it.id){activeCell=null;renderToolbar();}
@@ -1079,28 +1141,29 @@ board.addEventListener('pointermove',function(e){
     drag.moved=true;
     drag.orig.forEach(function(o){var it=byId(o.id);it.x=o.x+gx;it.y=o.y+gy;var el=itemsEl.querySelector('[data-id="'+o.id+'"]');if(el){el.style.left=it.x+'px';el.style.top=it.y+'px';}});
     drag.sorig.forEach(function(o){B.strokes[o.i].p=o.p.map(function(q){return [q[0]+gx,q[1]+gy];});});
-    renderStrokes(); renderEdges(); placeToolbar(); return;}
+    renderStrokes(); renderEdges(); placeToolbar(); markTrash(overPalette(e)); return;}
   if(pan){view.x=pan.vx+(e.clientX-pan.sx);view.y=pan.vy+(e.clientY-pan.sy);applyView();return;}
   if(pen){var p=toWorld(e.clientX,e.clientY),q=[Math.round(p.x),Math.round(p.y)],l=pen.p[pen.p.length-1];
     if(q[0]!==l[0]||q[1]!==l[1]){pen.p.push(q);pen.el.setAttribute('points',pen.p.map(function(a){return a[0]+','+a[1];}).join(' '));}return;}
   if(!drag) return;
   var dx=(e.clientX-drag.sx)/view.z, dy=(e.clientY-drag.sy)/view.z;
   if(!drag.moved&&Math.hypot(dx,dy)<3) return;
-  if(!drag.moved&&(drag.alt||e.altKey)){ var src=byId(drag.id), cp=clone(src); cp.id=nid(); cp.x=drag.ox; cp.y=drag.oy; delete cp._snap; delete cp.z; B.items.push(cp);
+  if(!drag.moved&&(drag.alt||e.altKey)){ var src=byId(drag.id), cp=clone(src); cp.id=nid(); cp.x=drag.ox; cp.y=drag.oy; delete cp._snap; delete cp.z; delete cp.g; B.items.push(cp);
     sel=cp.id; activeCell=null; renderAll(); drag.id=cp.id; drag.el=itemsEl.querySelector('[data-id="'+cp.id+'"]'); drag.copied=true; }
   drag.moved=true; var it=byId(drag.id);
   var nx=Math.round(drag.ox+dx), ny=Math.round(drag.oy+dy), ddx=nx-it.x, ddy=ny-it.y;
   it.x=nx; it.y=ny; drag.el.style.left=it.x+'px'; drag.el.style.top=it.y+'px';
-  renderEdges(); placeToolbar(); drawMini();
+  renderEdges(); placeToolbar(); drawMini(); markTrash(overPalette(e));
 });
 board.addEventListener('pointerup',function(e){
   if(shp){shapeEnd(e);finishShape();return;}
   if(erasing){var hit=erasing.hit;erasing=null;board.classList.remove('erasing');if(hit)commit();return;}
   if(marq){finishMarquee();return;}
-  if(drag&&drag.group){var g=drag;drag=null;
+  if(drag&&drag.group){var g=drag;drag=null; markTrash(false);
+    if(g.moved&&overPalette(e)){dropDelete(g.orig.map(function(o){return o.id;}),g.sorig.map(function(o){return o.i;}));return;}
     if(g.moved){commit();if(g.copied)toast(_T('已複製一份'));return;}
     // 沒拖動：當成點一下 → 只選這一個
-    if(!g.id){renderAll();return;}
+    if(!g.id||g.keep){renderAll();return;}
     clearMulti(); sel=g.id; renderAll();
     if(g.tapEl&&g.tapEl.isConnected===false&&g.tapEl.dataset){ // 重畫後找回同一格
       var ds=g.tapEl.dataset, q=ds.c!=null?'[data-c="'+ds.c+'"]':ds.r!=null?'[data-r="'+ds.r+'"][data-k="'+ds.k+'"]':null;
@@ -1111,7 +1174,8 @@ board.addEventListener('pointerup',function(e){
   if(pan){pan=null;board.classList.remove('panning');persist();return;}
   if(pen){var done=pen;pen=null;if(done.p.length>1)B.strokes.push({p:done.p,c:done.c});renderStrokes();commit();return;}
   if(!drag) return;
-  var it=byId(drag.id), moved=drag.moved, del=drag.el, drag0copied=drag.copied; drag=null;
+  var it=byId(drag.id), moved=drag.moved, del=drag.el, drag0copied=drag.copied; drag=null; markTrash(false);
+  if(moved&&overPalette(e)){dropDelete([it.id],[]);return;}
   if(!moved){
     var now=Date.now(), dbl=lastTap.id===it.id&&now-lastTap.t<400; lastTap={id:it.id,t:now};
     if(it.type==='text'||it.type==='note'){var ed=del.querySelector('[data-f="text"]');ed.focus();caretEnd(ed);return;}
@@ -1295,6 +1359,7 @@ document.addEventListener('keydown',function(e){
   if(!typing&&mod&&e.key.toLowerCase()==='c'&&(sel||msel.length||mstk.length)){e.preventDefault();copyGroup();return;}
   if(!typing&&mod&&e.key.toLowerCase()==='v'&&clip){e.preventDefault();pasteClip();return;}
   if(!typing&&mod&&(e.code==='BracketRight'||e.code==='BracketLeft')&&(sel||msel.length||mstk.length)){e.preventDefault();reorder(e.code==='BracketRight'?(e.altKey?'front':'fwd'):(e.altKey?'back':'bwd'));return;}
+  if(!typing&&mod&&e.key.toLowerCase()==='g'){e.preventDefault();if(e.shiftKey)ungroupSel();else groupSel();return;}
   if(!typing&&mod&&e.key.toLowerCase()==='a'){e.preventDefault();setMulti(B.items.map(function(x){return x.id;}),B.strokes.map(function(_,i){return i;}));return;}
   if(!typing&&e.shiftKey&&!mod&&(e.code==='Digit1')){e.preventDefault();fit();return;}
   if(!typing&&e.shiftKey&&!mod&&(e.code==='Digit0')){e.preventDefault();zoomTo(1);return;}
@@ -1498,7 +1563,13 @@ function zoomTo(z){var r=board.getBoundingClientRect();zoomAt(r.left+r.width/2,r
 $('zv').onclick=function(){popMenu($('zv'),[[_T('放大'),_T('⌘＋'),function(){zoomTo(view.z*1.25);}],[_T('縮小'),'⌘−',function(){zoomTo(view.z/1.25);}],'-',[_T('縮放到 100%'),'⇧0',function(){zoomTo(1);}],[_T('全部看得到'),'⇧1',fit]],'up');};
 $('setBtn').onclick=function(){var th=document.documentElement.dataset.theme||'system';
   popMenu($('setBtn'),[0,1].map(function(n){return [_T('陣列 index 從 {n} 開始',{n:n}),idxBase===n?'✓':'',function(){setIdxBase(n);}];}).concat(['-'],
-    [['light',_T('風格：淺色')],['dark',_T('風格：深色')],['system',_T('風格：跟著系統')]].map(function(x){return [x[1],th===x[0]?'✓':'',function(){setTheme(x[0]);}];})),'up');};
+    [['light',_T('風格：淺色')],['dark',_T('風格：深色')],['system',_T('風格：跟著系統')]].map(function(x){return [x[1],th===x[0]?'✓':'',function(){setTheme(x[0]);}];}),['-'],lpItems(lpDef,setLpDef)),'up');};
+function lpItems(cur,fn){return [['top',_T('名稱位置：上')],['bottom',_T('名稱位置：下')],['left',_T('名稱位置：左')],['right',_T('名稱位置：右')]].map(function(x){return [x[1],cur===x[0]?'✓':'',function(){fn(x[0]);}];});}
+function setLpDef(v){if(lpDef===v)return; lpDef=v; try{localStorage.setItem('drycanvas-lp',v);}catch(e){} renderAll();}
+function lpMenu(it){ // 單一元件自己的名稱位置；選「跟著預設」就拿掉 it.lp
+  var b=$('mt').querySelector('[data-act="lpMenu"]'); if(!b) return;
+  popMenu(b,lpItems(it.lp,function(v){it.lp=v;renderAll();commit();}).concat(['-',[_T('跟著預設'),it.lp?'':'✓',function(){delete it.lp;renderAll();commit();}]]));
+}
 function setIdxBase(n){if(idxBase===n)return; idxBase=n; try{localStorage.setItem('drycanvas-ib',n);}catch(e){} renderAll(); toast(_T('陣列 index 改成從 {n} 開始',{n:n}));}
 function setTheme(t){if(t==='system') delete document.documentElement.dataset.theme; else document.documentElement.dataset.theme=t; try{localStorage.setItem('drycanvas-theme',t);}catch(e){} drawMini();}
 try{matchMedia('(prefers-color-scheme:dark)').addEventListener('change',drawMini);}catch(e){} // 跟著系統時，系統換深淺色要重畫小地圖
