@@ -287,6 +287,7 @@ table.grid .ax{display:inline-block;min-width:12px;padding:0 2px;border-radius:3
 .langrow{display:flex;align-items:center;gap:6px;padding:0 6px;color:var(--ui-dim)}
 .langsel{border:1px solid var(--panel-line);background:var(--panel);color:var(--ui-text);border-radius:6px;padding:3px 6px;font-size:12px;cursor:pointer;max-width:100%}
 </style>
+<script>/* 風格：先套上存好的淺色／深色，免得畫面先閃一下系統的顏色 */try{var t=localStorage.getItem('drycanvas-theme');if(t==='light'||t==='dark')document.documentElement.dataset.theme=t;}catch(e){}</script>
 
 <div class="app">
   <aside class="palette" id="palette" aria-label="元件">
@@ -1495,9 +1496,12 @@ $('zout').onclick=function(){var r=board.getBoundingClientRect();zoomAt(r.left+r
 $('zfit').onclick=fit;
 function zoomTo(z){var r=board.getBoundingClientRect();zoomAt(r.left+r.width/2,r.top+r.height/2,z/view.z);persist();}
 $('zv').onclick=function(){popMenu($('zv'),[[_T('放大'),_T('⌘＋'),function(){zoomTo(view.z*1.25);}],[_T('縮小'),'⌘−',function(){zoomTo(view.z/1.25);}],'-',[_T('縮放到 100%'),'⇧0',function(){zoomTo(1);}],[_T('全部看得到'),'⇧1',fit]],'up');};
-$('setBtn').onclick=function(){
-  popMenu($('setBtn'),[0,1].map(function(n){return [_T('陣列 index 從 {n} 開始',{n:n}),idxBase===n?'✓':'',function(){setIdxBase(n);}];}),'up');};
+$('setBtn').onclick=function(){var th=document.documentElement.dataset.theme||'system';
+  popMenu($('setBtn'),[0,1].map(function(n){return [_T('陣列 index 從 {n} 開始',{n:n}),idxBase===n?'✓':'',function(){setIdxBase(n);}];}).concat(['-'],
+    [['light',_T('風格：淺色')],['dark',_T('風格：深色')],['system',_T('風格：跟著系統')]].map(function(x){return [x[1],th===x[0]?'✓':'',function(){setTheme(x[0]);}];})),'up');};
 function setIdxBase(n){if(idxBase===n)return; idxBase=n; try{localStorage.setItem('drycanvas-ib',n);}catch(e){} renderAll(); toast(_T('陣列 index 改成從 {n} 開始',{n:n}));}
+function setTheme(t){if(t==='system') delete document.documentElement.dataset.theme; else document.documentElement.dataset.theme=t; try{localStorage.setItem('drycanvas-theme',t);}catch(e){} drawMini();}
+try{matchMedia('(prefers-color-scheme:dark)').addEventListener('change',drawMini);}catch(e){} // 跟著系統時，系統換深淺色要重畫小地圖
 $('helpBtn').onclick=function(){$('help').hidden=!$('help').hidden;};
 function fit(){
   var els=itemsEl.querySelectorAll('.it'); if(!els.length){view={x:40,y:30,z:1};applyView();return;}

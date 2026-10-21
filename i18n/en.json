@@ -202,5 +202,8 @@
   "點一下放到畫面中間，或直接拖到畫布上。": "Click to place in the center, or drag onto the canvas.",
   "設定": "Settings",
   "陣列 index 從 {n} 開始": "Array index starts at {n}",
-  "陣列 index 改成從 {n} 開始": "Array index now starts at {n}"
+  "陣列 index 改成從 {n} 開始": "Array index now starts at {n}",
+  "風格：淺色": "Theme: Light",
+  "風格：深色": "Theme: Dark",
+  "風格：跟著系統": "Theme: System"
 }

@@ -202,5 +202,8 @@
   "點一下放到畫面中間，或直接拖到畫布上。": "Cliquez pour placer au centre de la vue, ou glissez directement sur le canevas.",
   "設定": "Paramètres",
   "陣列 index 從 {n} 開始": "Index des tableaux à partir de {n}",
-  "陣列 index 改成從 {n} 開始": "Les index des tableaux commencent maintenant à {n}"
+  "陣列 index 改成從 {n} 開始": "Les index des tableaux commencent maintenant à {n}",
+  "風格：淺色": "Thème : clair",
+  "風格：深色": "Thème : sombre",
+  "風格：跟著系統": "Thème : système"
 }
